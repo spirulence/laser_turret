@@ -46,9 +46,9 @@ class PlayerOne(object):
     def update(self, state):
         if self.alive:
             if state.keys[key.D]:
-                self.sprite.x += 1
+                self.sprite.x += 4
             if state.keys[key.A]:
-                self.sprite.x -= 1
+                self.sprite.x -= 4
             if state.keys[key.W]:
                 self.sprite.y += 4
             if state.keys[key.S]:
@@ -80,9 +80,9 @@ class PlayerTwo(object):
             if state.keys[key.J]:
                 self.sprite.x -= 4
             if state.keys[key.I]:
-                self.sprite.y += 1
+                self.sprite.y += 4
             if state.keys[key.K]:
-                self.sprite.y -= 1
+                self.sprite.y -= 4
 
         if state.laser_time > 0 and laser_collision(self.sprite.position, state.laser_rotation):
             self.alive = False
