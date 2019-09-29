@@ -1,4 +1,5 @@
 import math
+import random
 
 import pyglet
 from pyglet.window import key
@@ -37,7 +38,7 @@ def get_collisions(e1, entities):
     collisions = []
     e1.collisions = []
     for e2 in entities:
-        if e2.is_collidable and e1 is not e2 and abs(e1.sprite.x - e2.sprite.x) < 20 and abs(e1.sprite.y - e2.sprite.y) < 20:
+        if e2.is_collidable and e1 is not e2 and abs(e1.sprite.x - e2.sprite.x) < 40 and abs(e1.sprite.y - e2.sprite.y) < 40:
             coll = collision(e1, e2)
             collisions.append(coll)
     return collisions
@@ -46,6 +47,24 @@ def get_collisions(e1, entities):
 # assert laser_collision((1920,0), 126)
 # assert laser_collision((0,1080), -59)
 # assert laser_collision((1920,1080), 51)
+
+class Scoreboard():
+    def __init__(self):
+        self.label = pyglet.text.HTMLLabel(
+            '0', x=0, y=0,
+            anchor_x='center', anchor_y='center')
+        self.label.color = (255, 255, 255, 255)
+        self.is_collidable = False
+    
+    def update(self, string, x, y):
+        self.label = pyglet.text.HTMLLabel(
+            string,
+            x=x, y=y,
+            anchor_x='center', anchor_y='center')
+        self.label.color = (255, 255, 255, 255)
+
+    def draw(self):
+        self.label.draw()
 
 class PlayerOne(object):
 
@@ -58,6 +77,8 @@ class PlayerOne(object):
         self.sprite.y = 0
         self.alive = True
         self.is_collidable = True
+        self.scoreboard = Scoreboard()
+        self.score = 0
 
     def update(self, state):
         if self.alive:
@@ -69,18 +90,21 @@ class PlayerOne(object):
                 self.sprite.y += 4
             if state.keys[key.S]:
                 self.sprite.y -= 4
+            self.scoreboard.label.x = self.sprite.x
+            self.scoreboard.label.y = self.sprite.y + 40
 
         if state.laser_time > 0 and laser_collision(self.sprite.position, state.laser_rotation):
             self.alive = False
 
         collisions = get_collisions(self, entities)
         for c in collisions:
-            if isinstance(c.entity2, Consumable):
+            if isinstance(c.entity2, Consumable) and c.entity2.alive:
                 c.entity2.consume(self)
 
     def draw(self):
         if self.alive:
             self.sprite.draw()
+            self.scoreboard.label.draw()
 
 
 class PlayerTwo(object):
@@ -90,10 +114,12 @@ class PlayerTwo(object):
         self.sprite.image.anchor_x = self.sprite.image.width / 2
         self.sprite.image.anchor_y = self.sprite.image.height / 2
         self.sprite.rotation = -90
-        self.sprite.x = 0
-        self.sprite.y = 0
+        self.sprite.x = 200
+        self.sprite.y = 200
         self.alive = True
         self.is_collidable = True
+        self.scoreboard = Scoreboard()
+        self.score = 0
 
     def update(self, state):
         if self.alive:
@@ -105,13 +131,21 @@ class PlayerTwo(object):
                 self.sprite.y += 4
             if state.keys[key.K]:
                 self.sprite.y -= 4
+            self.scoreboard.label.x = self.sprite.x
+            self.scoreboard.label.y = self.sprite.y + 40
 
         if state.laser_time > 0 and laser_collision(self.sprite.position, state.laser_rotation):
             self.alive = False
+        
+        collisions = get_collisions(self, entities)
+        for c in collisions:
+            if isinstance(c.entity2, Consumable) and c.entity2. alive:
+                c.entity2.consume(self)
 
     def draw(self):
         if self.alive:
             self.sprite.draw()
+            self.scoreboard.label.draw()
 
 
 class LaserTurret(object):
@@ -161,35 +195,33 @@ class Laser(object):
             self.sprite.draw()
 
 class Consumable():
-    def __init__(self):
-        self.sprite = pyglet.sprite.Sprite(pyglet.resource.image('resources/smiley.png'))
+    def __init__(self, x, y):
+        self.sprite = pyglet.sprite.Sprite(pyglet.resource.image('resources/happy_face.png'))
         self.sprite.image.anchor_x = self.sprite.image.width / 2
         self.sprite.image.anchor_y = self.sprite.image.height / 2
-        self.sprite.x = 1920/2
-        self.sprite.y = 1080/2
-        self.consumed = False
+        self.sprite.x = x
+        self.sprite.y = y
+        self.alive = True
         self.is_collidable = True
 
     def update(self, state):
         pass
 
     def draw(self):
-        if not self.consumed:
+        if self.alive:
             self.sprite.draw()
 
-    def consume(player):
+    def consume(self, player):
+        self.alive = False
         player.score += 1
-
-# class Scoreboard():
-#     def __init__(self):
-#         self.label = pyglet.text.HTMLLabel(
-#             '<font face="Times New Roman" size="4">Hello, <i>world</i></font>',
-#             x=window.width//2, y=window.height//2,
-#             anchor_x='center', anchor_y='center')
+        player.scoreboard.update(str(player.score), player.sprite.x, player.sprite.y)
 
 entities = [
     PlayerOne(), PlayerTwo(), LaserTurret(), Laser()
 ]
+
+for x in range(20):
+    entities.append(Consumable(random.random()*1920, random.random()*1080))
 
 keys = pyglet.window.key.KeyStateHandler()
 window.push_handlers(keys)
