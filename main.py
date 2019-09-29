@@ -16,19 +16,6 @@ pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
 pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
 
 
-def player_angle_to_laser(player_position):
-    rotation_radians = math.atan2(player_position[1] - 1080 / 2, player_position[0] - 1920 / 2)
-    rotation_degrees = math.degrees(rotation_radians)
-    return rotation_degrees % 360
-
-
-def laser_collision(player_position, laser_rotation):
-    laser_rotation = (-laser_rotation + 90) % 360
-    rotation_radians = math.atan2(player_position[1] - 1080/2, player_position[0] - 1920/2)
-    rotation_degrees = math.degrees(rotation_radians) % 360
-    return math.isclose(rotation_degrees, laser_rotation, abs_tol=3)
-
-
 class collision(object):
     def __init__(self, entity1, entity2):
         self.entity1 = entity1

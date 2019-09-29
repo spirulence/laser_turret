@@ -1,4 +1,7 @@
+import math
+
 import pyglet
+
 
 
 class Player(object):
@@ -13,6 +16,12 @@ class Player(object):
         self.faces_collected = 0
         self.is_collidable = True
 
+    def laser_collision(self, laser_rotation):
+        laser_rotation = (-laser_rotation + 90) % 360
+        rotation_radians = math.atan2(self.sprite.y - 1080 / 2, self.sprite.x - 1920 / 2)
+        rotation_degrees = math.degrees(rotation_radians) % 360
+        return math.isclose(rotation_degrees, laser_rotation, abs_tol=3)
+
     def update(self, state):
         if self.alive:
             if state.keys[self.right_key]:
@@ -24,7 +33,7 @@ class Player(object):
             if state.keys[self.down_key]:
                 self.sprite.y -= 4
 
-        if state.laser_time > 0 and laser_collision(self.sprite.position, state.laser_rotation):
+        if state.laser_time > 0 and self.laser_collision(state.laser_rotation):
             self.alive = False
 
     def draw(self):
