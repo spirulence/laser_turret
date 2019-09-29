@@ -25,7 +25,7 @@ def laser_collision(player_position, laser_rotation):
     laser_rotation = (-laser_rotation + 90) % 360
     rotation_radians = math.atan2(player_position[1] - 1080/2, player_position[0] - 1920/2)
     rotation_degrees = math.degrees(rotation_radians) % 360
-    return math.isclose(rotation_degrees, laser_rotation, abs_tol=5)
+    return math.isclose(rotation_degrees, laser_rotation, abs_tol=3)
 
 # assert laser_collision((0,0), -128)
 # assert laser_collision((1920,0), 126)
@@ -88,7 +88,8 @@ class PlayerTwo(object):
             self.alive = False
 
     def draw(self):
-        self.sprite.draw()
+        if self.alive:
+            self.sprite.draw()
 
 
 class LaserTurret(object):
