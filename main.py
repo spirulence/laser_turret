@@ -1,8 +1,10 @@
 import math
+import random
 
 import pyglet
 from pyglet.window import key
 
+from entities.cover import Cover
 from entities.gameendgraphic import GameEndGraphic
 from entities.laser import Laser
 from entities.laserturret import LaserTurret
@@ -65,6 +67,17 @@ entities = [
     player_1, player_2, LaserTurret(), Laser()
 ]
 
+cover = []
+
+for i in range(15):
+    x, y = random.randrange(1920), random.randrange(1080)
+    if math.isclose(x, 1920/2, abs_tol=200) and math.isclose(y, 1080/2, abs_tol=200):
+        pass
+    else:
+        cover.append(Cover(x, y))
+
+entities += cover
+
 player_1_wins = GameEndGraphic('player_1_wins.png')
 player_2_wins = GameEndGraphic('player_2_wins.png')
 turret_wins = GameEndGraphic('turret_wins.png')
@@ -75,17 +88,44 @@ window.push_handlers(keys)
 
 class GlobalState(object):
 
-    def __init__(self):
+    def __init__(self, cover):
         self.keys = keys
         self.laser_rotation = None
         self.laser_time = 0
+        self.cover = cover
 
-    def set_laser(self, rotation):
+    @staticmethod
+    def laser_collision(entity, laser_rotation):
+        laser_rotation = (-laser_rotation + 90) % 360
+        rotation_radians = math.atan2(entity.sprite.y - 1080 / 2, entity.sprite.x - 1920 / 2)
+        rotation_degrees = math.degrees(rotation_radians) % 360
+        return math.isclose(rotation_degrees, laser_rotation, abs_tol=3)
+
+    @staticmethod
+    def distance_from_center(entity):
+        return math.hypot(entity.sprite.x - 1920/2, entity.sprite.y - 1080/2)
+
+    def fire_laser(self, rotation):
+        fired_upon = []
+
+        for cover in self.cover:
+            if self.laser_collision(cover, rotation) and cover.alive:
+                fired_upon.append(cover)
+
+        for player in [player_1, player_2]:
+            if self.laser_collision(player, rotation) and player.alive:
+                fired_upon.append(player)
+
+        fired_upon.sort(key=lambda entity: self.distance_from_center(entity))
+
+        if fired_upon:
+            fired_upon[0].alive = False
+
+        self.laser_time = 5
         self.laser_rotation = rotation
-        self.laser_time = 4
 
 
-state = GlobalState()
+state = GlobalState(cover)
 
 
 def on_draw(time_delta):

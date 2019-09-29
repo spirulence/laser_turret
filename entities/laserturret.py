@@ -21,7 +21,7 @@ class LaserTurret(object):
         if state.keys[key.B]:
             self.sprite.rotation -= 1
         if state.keys[key.SPACE] and self.cooldown_elapsed >= self.cooldown_time:
-            state.set_laser(self.sprite.rotation)
+            state.fire_laser(self.sprite.rotation)
             self.cooldown_elapsed = 0
 
     def draw(self):
