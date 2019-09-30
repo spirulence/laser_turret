@@ -13,7 +13,7 @@ class LaserTurret(object):
         self.cooldown_elapsed = 60
         self.is_collidable = True
 
-    def update(self, state):
+    def update(self, state, entities):
         self.cooldown_elapsed += 1
 
         if state.keys[key.V]:

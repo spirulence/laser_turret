@@ -11,7 +11,7 @@ class Laser(object):
         self.alive = False
         self.is_collidable = False
 
-    def update(self, state):
+    def update(self, state, entities):
         state.laser_time -= 1
         self.alive = state.laser_time > 0
         self.sprite.rotation = state.laser_rotation
