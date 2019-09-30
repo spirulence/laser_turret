@@ -11,7 +11,7 @@ class GameEndGraphic(object):
 
         self.sprite = sprite
 
-    def update(self):
+    def update(self, _state):
         pass
 
     def draw(self):
